@@ -19,7 +19,6 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.widget.Checkable
 import androidx.activity.ComponentActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -334,12 +333,12 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
   fun toggleNightModeOnAnimatorEnd(owner: LifecycleOwner, block: ((Boolean) -> Unit)? = null) {
     setOnAnimatorEndListener { isChecked ->
       Log.d(TAG, "toggleNightModeOnAnimatorEnd: isChecked = $isChecked")
-      setUiNightMode(owner, isChecked)
+      DayNightManager.isNightMode = isChecked
     }
     setOnCheckedChangeListener { isChecked ->
-      DayNightRepository.isNightMode = isChecked
       block?.invoke(isChecked)
     }
+    cancelAnimatorOnDestroy(owner)
   }
 
   fun toggleNightModeOnAnimatorStart(activity: ComponentActivity, block: ((Boolean) -> Unit)? = null) =
@@ -368,10 +367,10 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     }
     setOnCheckedChangeListener { isChecked ->
       liveData.value = isChecked
-      DayNightRepository.isNightMode = isChecked
+      DayNightManager.isNightMode = isChecked
       block?.invoke(isChecked)
-      setUiNightMode(lifecycleOwner, isChecked)
     }
+    cancelAnimatorOnDestroy(lifecycleOwner)
   }
 
   fun setOnCheckedChangeListener(listener: OnCheckedChangeListener?) {
@@ -386,18 +385,13 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     onFractionChangedListener = listener
   }
 
-  private fun setUiNightMode(owner: LifecycleOwner, isNightMode: Boolean) {
+  private fun cancelAnimatorOnDestroy(owner: LifecycleOwner) {
     owner.lifecycle.addObserver(object : DefaultLifecycleObserver {
       override fun onDestroy(owner: LifecycleOwner) {
         animator?.cancel()
         animator = null
       }
     })
-    if (isNightMode) {
-      AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-    } else {
-      AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-    }
   }
 
   private val Int.dp get() = (this * resources.displayMetrics.density + 0.5f).toInt()
@@ -418,6 +412,6 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
   companion object {
     private const val TAG = "DayNightSwitch"
 
-    var isFollowSystem: Boolean by DayNightRepository::isFollowSystem
+    var isFollowSystem: Boolean by DayNightManager::isFollowSystem
   }
 }

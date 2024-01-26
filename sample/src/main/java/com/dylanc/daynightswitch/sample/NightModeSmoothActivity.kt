@@ -17,23 +17,21 @@ class NightModeSmoothActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(binding.root)
-    binding.apply {
-      btnBack.setOnClickListener { finish() }
-      dayNightSwitch.toggleNightModeOnAnimatorEnd(this@NightModeSmoothActivity) { isChecked ->
-        windowInsetsController.isAppearanceLightStatusBars = !isChecked
+    binding.btnBack.setOnClickListener { finish() }
+    binding.dayNightSwitch.toggleNightModeOnAnimatorEnd(this) { isChecked ->
+      windowInsetsController.isAppearanceLightStatusBars = !isChecked
+    }
+    binding.dayNightSwitch.setOnFractionChangedListener { fraction ->
+      if (fraction == 0f) {
+        windowInsetsController.isAppearanceLightStatusBars = true
+      } else if (fraction == 1f) {
+        windowInsetsController.isAppearanceLightStatusBars = false
       }
-      dayNightSwitch.setOnFractionChangedListener { fraction ->
-        if (fraction == 0f) {
-          windowInsetsController.isAppearanceLightStatusBars = true
-        } else if (fraction == 1f) {
-          windowInsetsController.isAppearanceLightStatusBars = false
-        }
-        window.decorView.setBackgroundColor(evaluator.evaluate(fraction, getColor(R.color.background_day), getColor(R.color.background_night)) as Int)
-        window.statusBarColor = evaluator.evaluate(fraction, getColor(R.color.background_day), getColor(R.color.background_night)) as Int
-        tvNightMode.setTextColor(evaluator.evaluate(fraction, getColor(R.color.text_primary_day), getColor(R.color.text_primary_night)) as Int)
-        btnBack.imageTintList =
-          ColorStateList.valueOf(evaluator.evaluate(fraction, getColor(R.color.text_primary_day), getColor(R.color.text_primary_night)) as Int)
-      }
+      window.decorView.setBackgroundColor(evaluator.evaluate(fraction, getColor(R.color.background_day), getColor(R.color.background_night)) as Int)
+      window.statusBarColor = evaluator.evaluate(fraction, getColor(R.color.background_day), getColor(R.color.background_night)) as Int
+      binding.tvNightMode.setTextColor(evaluator.evaluate(fraction, getColor(R.color.text_primary_day), getColor(R.color.text_primary_night)) as Int)
+      binding.btnBack.imageTintList =
+        ColorStateList.valueOf(evaluator.evaluate(fraction, getColor(R.color.text_primary_day), getColor(R.color.text_primary_night)) as Int)
     }
   }
 }

@@ -2,10 +2,11 @@ package com.dylanc.daynightswitch.sample
 
 import android.content.Intent
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import com.dylanc.daynightswitch.DayNightManager
 import com.dylanc.daynightswitch.DayNightSwitch
 import com.dylanc.daynightswitch.sample.databinding.ActivityMainBinding
 
@@ -28,9 +29,6 @@ class MainActivity : AppCompatActivity() {
     binding.cbFollowSystem.isChecked = DayNightSwitch.isFollowSystem
     binding.cbFollowSystem.setOnCheckedChangeListener { _, isChecked ->
       DayNightSwitch.isFollowSystem = isChecked
-      if(isChecked) {
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-      }
     }
   }
 }
