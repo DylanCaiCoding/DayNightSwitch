@@ -1,6 +1,20 @@
 plugins {
   id("com.android.library")
   id("org.jetbrains.kotlin.android")
+  id("maven-publish")
+}
+
+afterEvaluate {
+  publishing {
+    publications {
+      create<MavenPublication>("release") {
+        groupId = "com.dylanc"
+        artifactId = "daynightswitch"
+        version = "1.0.0"
+        from(components["release"])
+      }
+    }
+  }
 }
 
 android {
