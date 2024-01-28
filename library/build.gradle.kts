@@ -45,5 +45,5 @@ android {
 
 dependencies {
   implementation("androidx.appcompat:appcompat:1.6.1")
-  implementation("androidx.startup:startup-runtime:1.1.0")
+  implementation("androidx.startup:startup-runtime:1.1.1")
 }
