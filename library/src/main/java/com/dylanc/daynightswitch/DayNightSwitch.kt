@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2024. Dylan Cai
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@file:Suppress("unused")
+
 package com.dylanc.daynightswitch
 
 import android.animation.Animator
@@ -13,7 +31,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -68,7 +85,6 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     set(value) {
       field = if (value < 0) 0f else if (value > 1) 1f else value
       onFractionChangedListener?.onFractionChanged(field)
-      Log.d(TAG, "onFractionChanged: fraction = $fraction")
       invalidate()
     }
 
@@ -143,10 +159,12 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     path.addRoundRect(left, top, right, bottom, height / 2f, height / 2f, Path.Direction.CCW)
     canvas.clipPath(path)
 
+    // Draw sky
     paint.style = Paint.Style.FILL
     paint.color = argbEvaluator.evaluate(fraction, skyDayColor, skyNightColor) as Int
     canvas.drawPath(path, paint)
 
+    // Draw clouds of second layer
     val heightOffset = fraction * height + top
     paint.color = cloudSecondaryColor
     path.reset()
@@ -162,15 +180,16 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     path.close()
     canvas.drawPath(path, paint)
 
+    // Draw ripple
     val radius = width * 0.15f
     val circleCenterX = height / 2 + fraction * (width - height)
     val circleCenterY = height / 2
-
     paint.color = rippleColor
     canvas.drawCircle(left + circleCenterX, top + circleCenterY, radius * 3.9f, paint)
     canvas.drawCircle(left + circleCenterX, top + circleCenterY, radius * 3.1f, paint)
     canvas.drawCircle(left + circleCenterX, top + circleCenterY, radius * 2.2f, paint)
 
+    // Draw clouds of first layer
     paint.color = cloudColor
     path.reset()
     path.moveTo(left + width * 0.10f, height + heightOffset)
@@ -185,6 +204,7 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     path.close()
     canvas.drawPath(path, paint)
 
+    // Draw stars
     paint.color = starColor
     canvas.drawStar(left + width * 0.103f, height * 0.317f - height + heightOffset, height * 0.045f)
     canvas.drawStar(left + width * 0.185f, height * 0.2f - height + heightOffset, height * 0.075f)
@@ -198,6 +218,7 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     canvas.drawStar(left + width * 0.134f, height * 0.7f - height + heightOffset, height * 0.035f)
     canvas.drawStar(left + width * 0.195f, height * 0.833f - height + heightOffset, height * 0.03f)
 
+    // Draw inner shadow
     paint.color = skyNightColor
     paint.style = Paint.Style.STROKE
     var strokeWidth = width * 0.1f
@@ -209,25 +230,26 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     )
     paint.setShadowLayer(width * 0.033f, 0f, width * 0.017f, outSideShadowColor)
     canvas.drawPath(path, paint)
-    paint.clearShadowLayer()
 
+    // Draw sun/moon
     paint.style = Paint.Style.FILL
     paint.color = argbEvaluator.evaluate(fraction, sunColor, moonColor) as Int
     paint.setShadowLayer(radius * 0.15f, width * 0.01f, width * 0.02f, sunShadowColor)
     canvas.drawCircle(left + circleCenterX, top + circleCenterY, radius, paint)
     paint.clearShadowLayer()
 
+    // Draw moon hole
     paint.color = argbEvaluator.evaluate(fraction, sunColor, moonHoleColor) as Int
     canvas.drawCircle(left + circleCenterX, top + circleCenterY - radius / 2, radius * 0.2f, paint)
     canvas.drawCircle(left + circleCenterX - radius * 0.3f, top + circleCenterY + radius * 0.2f, radius * 0.36f, paint)
     canvas.drawCircle(left + circleCenterX + radius * 0.5f, top + circleCenterY + radius * 0.32f, radius * 0.25f, paint)
     canvas.restore()
 
+    // Draw the light shadow of sun/moon
     canvas.save()
     path.reset()
     path.addCircle(left + circleCenterX, top + circleCenterY, radius, Path.Direction.CCW)
     canvas.clipPath(path)
-
     paint.style = Paint.Style.STROKE
     paint.color = skyNightColor
     strokeWidth = width.toFloat()
@@ -235,8 +257,6 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     paint.setShadowLayer(radius * 0.5f, 0f, 0f, Color.WHITE)
     canvas.drawCircle(left + circleCenterX + sqrt(radius * 0.5f), top + circleCenterY + sqrt(radius * 0.5f), radius * 1.13f + strokeWidth / 2, paint)
     paint.clearShadowLayer()
-
-    paint.style = Paint.Style.FILL
 
     canvas.restore()
   }
@@ -269,7 +289,6 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
           } else {
             (event.x - downX) / (width - height)
           }
-          Log.d(TAG, "onTouchEvent: fraction = $fraction")
         }
         true
       }
@@ -287,7 +306,6 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     }
 
   override fun performClick(): Boolean {
-    Log.d(TAG, "performClick: toggle")
     toggle()
     return super.performClick()
   }
@@ -296,9 +314,7 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     if (isChecked == checked && (fraction == 0f || fraction == 1f)) {
       return
     }
-    Log.d(TAG, "setChecked: checked = $checked, fraction = $fraction")
     if (animator?.isRunning == true) {
-      Log.d(TAG, "setChecked: cancel animator")
       animator?.cancel()
       animator = null
     }
@@ -330,17 +346,6 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
 
   override fun toggle() = setChecked(!isChecked)
 
-  fun toggleNightModeOnAnimatorEnd(owner: LifecycleOwner, block: ((Boolean) -> Unit)? = null) {
-    setOnAnimatorEndListener { isChecked ->
-      Log.d(TAG, "toggleNightModeOnAnimatorEnd: isChecked = $isChecked")
-      DayNightManager.isNightMode = isChecked
-    }
-    setOnCheckedChangeListener { isChecked ->
-      block?.invoke(isChecked)
-    }
-    cancelAnimatorOnDestroy(owner)
-  }
-
   fun toggleNightModeOnAnimatorStart(activity: ComponentActivity, block: ((Boolean) -> Unit)? = null) =
     toggleNightModeOnAnimatorStart(activity, activity, block)
 
@@ -371,6 +376,16 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
       block?.invoke(isChecked)
     }
     cancelAnimatorOnDestroy(lifecycleOwner)
+  }
+
+  fun toggleNightModeOnAnimatorEnd(owner: LifecycleOwner, block: ((Boolean) -> Unit)? = null) {
+    setOnAnimatorEndListener { isChecked ->
+      DayNightManager.isNightMode = isChecked
+    }
+    setOnCheckedChangeListener { isChecked ->
+      block?.invoke(isChecked)
+    }
+    cancelAnimatorOnDestroy(owner)
   }
 
   fun setOnCheckedChangeListener(listener: OnCheckedChangeListener?) {
@@ -410,8 +425,6 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
   }
 
   companion object {
-    private const val TAG = "DayNightSwitch"
-
     var isFollowSystem: Boolean by DayNightManager::isFollowSystem
   }
 }
