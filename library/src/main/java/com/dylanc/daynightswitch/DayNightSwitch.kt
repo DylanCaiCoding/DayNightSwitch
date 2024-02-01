@@ -378,6 +378,9 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     cancelAnimatorOnDestroy(lifecycleOwner)
   }
 
+  fun toggleNightModeOnAnimatorEnd(fragment: Fragment, block: ((Boolean) -> Unit)? = null) =
+    toggleNightModeOnAnimatorEnd(fragment.viewLifecycleOwner, block)
+
   fun toggleNightModeOnAnimatorEnd(owner: LifecycleOwner, block: ((Boolean) -> Unit)? = null) {
     setOnAnimatorEndListener { isChecked ->
       DayNightManager.isNightMode = isChecked
