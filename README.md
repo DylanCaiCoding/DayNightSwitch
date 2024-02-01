@@ -1,5 +1,7 @@
 # DayNightSwitch
 
+A nice switch to toogle day night mode.
+
 ## Preview
 
 <img src="./gif/DayNightSwitch.gif" width="40%"/>
@@ -27,6 +29,14 @@ dependencyResolutionManagement {
     mavenCentral()
     maven { url = uri("https://jitpack.io") }
   }
+}
+```
+
+Add the dependency:
+
+```kotlin
+dependencies {
+  implementation("com.github.DylanCaiCoding:DayNightSwitch:1.0.0")
 }
 ```
 
