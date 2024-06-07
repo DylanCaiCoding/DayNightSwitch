@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <color name="dns_sky_day">#3B76AA</color>
+  <color name="dns_sun">#F1C429</color>
+  <color name="dns_sky_night">#1D1E2B</color>
+  <color name="dns_moon">#C2C8D4</color>
+  <color name="dns_moon_hole">#959CAF</color>
+  <color name="dns_star">#FBFDFE</color>
+  <color name="dns_cloud">#F2FBFE</color>
+  <color name="dns_cloud_secondary">#A0C6E4</color>
+  <color name="dns_ripple">#1AFFFFFF</color>
+  <color name="dns_sun_shadow">#80000000</color>
+  <color name="dns_outside_shadow">#CC000000</color>
+</resources>

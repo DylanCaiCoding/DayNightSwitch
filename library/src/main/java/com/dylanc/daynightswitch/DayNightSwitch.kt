@@ -36,6 +36,8 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.widget.Checkable
 import androidx.activity.ComponentActivity
+import androidx.annotation.ColorRes
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -50,7 +52,7 @@ import kotlin.math.sqrt
  * @author Dylan Cai
  */
 class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(context, attrs), Checkable {
-  private val paint = Paint().apply { isAntiAlias = true }
+  private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
   private val path = Path()
   private var width = 0
   private var height = 0
@@ -60,27 +62,27 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
   private var bottom = 0f
   private var downX = 0f
   private var downY = 0f
-  private var isClick = false
   private val aspectRatio = 7.8f / 3f
   private val animatorDuration = 500L
-  private val skyDayColor = Color.parseColor("#3B76AA")
-  private val sunColor = Color.parseColor("#F1C429")
-  private val skyNightColor = Color.parseColor("#1D1E2B")
-  private val moonColor = Color.parseColor("#C2C8D4")
-  private val moonHoleColor = Color.parseColor("#959CAF")
-  private val starColor = Color.parseColor("#FBFDFE")
-  private val cloudColor = Color.parseColor("#F2FBFE")
-  private val cloudSecondaryColor = Color.parseColor("#A0C6E4")
-  private val rippleColor = Color.parseColor("#1AFFFFFF")
-  private val sunShadowColor = Color.parseColor("#80000000")
-  private val outSideShadowColor = Color.parseColor("#CC000000")
+  private val skyDayColor by colors(R.color.dns_sky_day)
+  private val sunColor by colors(R.color.dns_sun)
+  private val skyNightColor by colors(R.color.dns_sky_night)
+  private val moonColor by colors(R.color.dns_moon)
+  private val moonHoleColor by colors(R.color.dns_moon_hole)
+  private val starColor by colors(R.color.dns_star)
+  private val cloudColor by colors(R.color.dns_cloud)
+  private val cloudSecondaryColor by colors(R.color.dns_cloud_secondary)
+  private val rippleColor by colors(R.color.dns_ripple)
+  private val sunShadowColor by colors(R.color.dns_sun_shadow)
+  private val outSideShadowColor by colors(R.color.dns_outside_shadow)
   private val argbEvaluator = ArgbEvaluator()
-  private var isChecked = false
   private var onCheckedChangeListener: OnCheckedChangeListener? = null
   private var onAnimatorEndListener: OnCheckedChangeListener? = null
   private var onFractionChangedListener: (OnFractionChangedListener)? = null
   private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
   private var animator: ObjectAnimator? = null
+  private var isClick = false
+  private var isChecked = false
   private var fraction: Float = 0f
     set(value) {
       field = if (value < 0) 0f else if (value > 1) 1f else value
@@ -96,12 +98,12 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     }
 
   init {
+    setLayerType(LAYER_TYPE_SOFTWARE, null)
     isDefaultNightMode = when (resources.configuration.uiMode and UI_MODE_NIGHT_MASK) {
       UI_MODE_NIGHT_YES -> true
       UI_MODE_NIGHT_NO -> false
       else -> false
     }
-    setLayerType(LAYER_TYPE_SOFTWARE, null)
   }
 
   override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -411,6 +413,8 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
       }
     })
   }
+
+  private fun colors(@ColorRes id: Int) = lazy { ContextCompat.getColor(context, id) }
 
   private val Int.dp get() = (this * resources.displayMetrics.density + 0.5f).toInt()
 
