@@ -35,12 +35,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.widget.Checkable
-import androidx.activity.ComponentActivity
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -312,6 +308,12 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     return super.performClick()
   }
 
+  override fun onDetachedFromWindow() {
+    super.onDetachedFromWindow()
+    animator?.cancel()
+    animator = null
+  }
+
   override fun setChecked(checked: Boolean) {
     if (isChecked == checked && (fraction == 0f || fraction == 1f)) {
       return
@@ -348,18 +350,11 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
 
   override fun toggle() = setChecked(!isChecked)
 
-  fun toggleNightModeOnAnimatorStart(activity: ComponentActivity, block: ((Boolean) -> Unit)? = null) =
-    toggleNightModeOnAnimatorStart(activity, activity, block)
-
-  fun toggleNightModeOnAnimatorStart(fragment: Fragment, block: ((Boolean) -> Unit)? = null) =
-    toggleNightModeOnAnimatorStart(fragment, fragment.viewLifecycleOwner, block)
-
-  private fun toggleNightModeOnAnimatorStart(
-    viewModelStoreOwner: ViewModelStoreOwner,
-    lifecycleOwner: LifecycleOwner,
-    block: ((Boolean) -> Unit)? = null
+  fun toggleNightModeOnAnimatorStart(
+    storeOwner: ViewModelStoreOwner,
+    listener: OnCheckedChangeListener? = null
   ) {
-    val viewModel = ViewModelProvider(viewModelStoreOwner)[NightModeViewModel::class.java]
+    val viewModel = ViewModelProvider(storeOwner)[NightModeViewModel::class.java]
     val liveData = viewModel.isNightMode
     val isNightMode = liveData.value
     if (isNightMode != null) {
@@ -375,43 +370,23 @@ class DayNightSwitch(context: Context, attrs: AttributeSet? = null) : View(conte
     setOnCheckedChangeListener { isChecked ->
       liveData.value = isChecked
       DayNightManager.isNightMode = isChecked
-      block?.invoke(isChecked)
+      listener?.onCheckedChanged(isChecked)
     }
-    cancelAnimatorOnDestroy(lifecycleOwner)
   }
 
-  fun toggleNightModeOnAnimatorEnd(fragment: Fragment, block: ((Boolean) -> Unit)? = null) =
-    toggleNightModeOnAnimatorEnd(fragment.viewLifecycleOwner, block)
-
-  fun toggleNightModeOnAnimatorEnd(owner: LifecycleOwner, block: ((Boolean) -> Unit)? = null) {
-    setOnAnimatorEndListener { isChecked ->
+  fun toggleNightModeOnAnimatorEnd(listener: OnCheckedChangeListener? = null) {
+    onAnimatorEndListener = OnCheckedChangeListener { isChecked ->
       DayNightManager.isNightMode = isChecked
     }
-    setOnCheckedChangeListener { isChecked ->
-      block?.invoke(isChecked)
-    }
-    cancelAnimatorOnDestroy(owner)
+    setOnCheckedChangeListener(listener)
   }
 
   fun setOnCheckedChangeListener(listener: OnCheckedChangeListener?) {
     onCheckedChangeListener = listener
   }
 
-  fun setOnAnimatorEndListener(listener: OnCheckedChangeListener?) {
-    onAnimatorEndListener = listener
-  }
-
   fun setOnFractionChangedListener(listener: OnFractionChangedListener?) {
     onFractionChangedListener = listener
-  }
-
-  private fun cancelAnimatorOnDestroy(owner: LifecycleOwner) {
-    owner.lifecycle.addObserver(object : DefaultLifecycleObserver {
-      override fun onDestroy(owner: LifecycleOwner) {
-        animator?.cancel()
-        animator = null
-      }
-    })
   }
 
   private fun colors(@ColorRes id: Int) = lazy { ContextCompat.getColor(context, id) }

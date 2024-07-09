@@ -19,8 +19,8 @@ package com.dylanc.daynightswitch.sample
 import android.animation.ArgbEvaluator
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import com.dylanc.daynightswitch.sample.databinding.ActivityNightModeBinding
 
@@ -29,12 +29,16 @@ class NightModeSmoothActivity : AppCompatActivity() {
   private val binding by lazy { ActivityNightModeBinding.inflate(layoutInflater) }
   private val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
   private val evaluator = ArgbEvaluator()
+  private val backgroundDayColor by lazy { ContextCompat.getColor(this, R.color.background_day) }
+  private val backgroundNightColor by lazy { ContextCompat.getColor(this, R.color.background_night) }
+  private val textPrimaryDayColor by lazy { ContextCompat.getColor(this, R.color.text_primary_day) }
+  private val textPrimaryNightColor by lazy { ContextCompat.getColor(this, R.color.text_primary_night) }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(binding.root)
     binding.btnBack.setOnClickListener { finish() }
-    binding.dayNightSwitch.toggleNightModeOnAnimatorEnd(this) { isChecked ->
+    binding.dayNightSwitch.toggleNightModeOnAnimatorEnd { isChecked ->
       windowInsetsController.isAppearanceLightStatusBars = !isChecked
     }
     binding.dayNightSwitch.setOnFractionChangedListener { fraction ->
@@ -43,11 +47,10 @@ class NightModeSmoothActivity : AppCompatActivity() {
       } else if (fraction == 1f) {
         windowInsetsController.isAppearanceLightStatusBars = false
       }
-      window.decorView.setBackgroundColor(evaluator.evaluate(fraction, getColor(R.color.background_day), getColor(R.color.background_night)) as Int)
-      window.statusBarColor = evaluator.evaluate(fraction, getColor(R.color.background_day), getColor(R.color.background_night)) as Int
-      binding.tvNightMode.setTextColor(evaluator.evaluate(fraction, getColor(R.color.text_primary_day), getColor(R.color.text_primary_night)) as Int)
-      binding.btnBack.imageTintList =
-        ColorStateList.valueOf(evaluator.evaluate(fraction, getColor(R.color.text_primary_day), getColor(R.color.text_primary_night)) as Int)
+      window.decorView.setBackgroundColor(evaluator.evaluate(fraction, backgroundDayColor, backgroundNightColor) as Int)
+      window.statusBarColor = evaluator.evaluate(fraction, backgroundDayColor, backgroundNightColor) as Int
+      binding.tvNightMode.setTextColor(evaluator.evaluate(fraction, textPrimaryDayColor, textPrimaryNightColor) as Int)
+      binding.btnBack.imageTintList = ColorStateList.valueOf(evaluator.evaluate(fraction, textPrimaryDayColor, textPrimaryNightColor) as Int)
     }
   }
 }

@@ -28,6 +28,6 @@ class NightModeDelayActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(binding.root)
     binding.btnBack.setOnClickListener { finish() }
-    binding.dayNightSwitch.toggleNightModeOnAnimatorEnd(this)
+    binding.dayNightSwitch.toggleNightModeOnAnimatorEnd()
   }
 }
